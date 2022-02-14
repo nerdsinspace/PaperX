@@ -5,10 +5,43 @@ Subject: [PATCH] Add nether dimension custom scale
 
 
 diff --git a/src/main/java/net/minecraft/world/level/dimension/DimensionType.java b/src/main/java/net/minecraft/world/level/dimension/DimensionType.java
-index a41f4c915c26682f02b81d0104e63029e8b17e58..4490b385f30a7d6b2c78df61e52eb84aa3ce086d 100644
+index a41f4c915c26682f02b81d0104e63029e8b17e58..2256926c019cf44cf84c047c5a06b62c3b33a58a 100644
 --- a/src/main/java/net/minecraft/world/level/dimension/DimensionType.java
 +++ b/src/main/java/net/minecraft/world/level/dimension/DimensionType.java
-@@ -226,7 +226,9 @@ public class DimensionType {
+@@ -41,7 +41,31 @@ public class DimensionType {
+     public static final ResourceLocation OVERWORLD_EFFECTS = new ResourceLocation("overworld");
+     public static final ResourceLocation NETHER_EFFECTS = new ResourceLocation("the_nether");
+     public static final ResourceLocation END_EFFECTS = new ResourceLocation("the_end");
+-    public static final Codec<DimensionType> DIRECT_CODEC;
++    public static final Codec<DimensionType> DIRECT_CODEC = RecordCodecBuilder.<DimensionType>create((instance) ->
++        instance.group(
++            Codec.LONG.optionalFieldOf("fixed_time")
++                .xmap((optional) -> optional.map(OptionalLong::of)
++                    .orElseGet(OptionalLong::empty), (optionalLong) -> optionalLong.isPresent() ? Optional.of(optionalLong.getAsLong()) : Optional.empty()
++                ).forGetter((dimensionType) -> dimensionType.fixedTime),
++            Codec.BOOL.fieldOf("has_skylight").forGetter(DimensionType::hasSkyLight),
++            Codec.BOOL.fieldOf("has_ceiling").forGetter(DimensionType::hasCeiling),
++            Codec.BOOL.fieldOf("ultrawarm").forGetter(DimensionType::ultraWarm),
++            Codec.BOOL.fieldOf("natural").forGetter(DimensionType::natural),
++            Codec.doubleRange((double)1.0E-5F, 3.0E7D)
++                .fieldOf("coordinate_scale")
++                .forGetter(DimensionType::coordinateScale),
++            Codec.BOOL.fieldOf("piglin_safe").forGetter(DimensionType::piglinSafe),
++            Codec.BOOL.fieldOf("bed_works").forGetter(DimensionType::bedWorks),
++            Codec.BOOL.fieldOf("respawn_anchor_works").forGetter(DimensionType::respawnAnchorWorks),
++            Codec.BOOL.fieldOf("has_raids").forGetter(DimensionType::hasRaids),
++            Codec.intRange(MIN_Y, MAX_Y).fieldOf("min_y").forGetter(DimensionType::minY),
++            Codec.intRange(16, Y_SIZE).fieldOf("height").forGetter(DimensionType::height),
++            Codec.intRange(0, Y_SIZE).fieldOf("logical_height").forGetter(DimensionType::logicalHeight),
++            ResourceLocation.CODEC.fieldOf("infiniburn").forGetter((dimensionType) -> dimensionType.infiniburn),
++            ResourceLocation.CODEC.fieldOf("effects").orElse(OVERWORLD_EFFECTS).forGetter((dimensionType) -> dimensionType.effectsLocation),
++            Codec.FLOAT.fieldOf("ambient_light").forGetter((dimensionType) -> dimensionType.ambientLight)
++        ).apply(instance, DimensionType::new)
++    ).comapFlatMap(DimensionType::guardY, Function.identity());
+     private static final int MOON_PHASES = 8;
+     public static final float[] MOON_BRIGHTNESS_PER_PHASE = new float[]{1.0F, 0.75F, 0.5F, 0.25F, 0.0F, 0.25F, 0.5F, 0.75F};
+     public static final ResourceKey<DimensionType> OVERWORLD_LOCATION = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation("overworld"));
+@@ -226,7 +250,9 @@ public class DimensionType {
      }
  
      public double coordinateScale() {
@@ -19,6 +52,29 @@ index a41f4c915c26682f02b81d0104e63029e8b17e58..4490b385f30a7d6b2c78df61e52eb84a
      }
  
      public boolean piglinSafe() {
+@@ -295,22 +321,4 @@ public class DimensionType {
+             return this.hasSkylight == dimensionType.hasSkylight && this.hasCeiling == dimensionType.hasCeiling && this.ultraWarm == dimensionType.ultraWarm && this.natural == dimensionType.natural && this.coordinateScale == dimensionType.coordinateScale && this.createDragonFight == dimensionType.createDragonFight && this.piglinSafe == dimensionType.piglinSafe && this.bedWorks == dimensionType.bedWorks && this.respawnAnchorWorks == dimensionType.respawnAnchorWorks && this.hasRaids == dimensionType.hasRaids && this.minY == dimensionType.minY && this.height == dimensionType.height && this.logicalHeight == dimensionType.logicalHeight && Float.compare(dimensionType.ambientLight, this.ambientLight) == 0 && this.fixedTime.equals(dimensionType.fixedTime) && this.infiniburn.equals(dimensionType.infiniburn) && this.effectsLocation.equals(dimensionType.effectsLocation);
+         }
+     }
+-
+-    static {
+-        DIRECT_CODEC = RecordCodecBuilder.create((instance) -> {
+-            return instance.group(Codec.LONG.optionalFieldOf("fixed_time").xmap((optional) -> {
+-                return optional.map(OptionalLong::of).orElseGet(OptionalLong::empty);
+-            }, (optionalLong) -> {
+-                return optionalLong.isPresent() ? Optional.of(optionalLong.getAsLong()) : Optional.empty();
+-            }).forGetter((dimensionType) -> {
+-                return dimensionType.fixedTime;
+-            }), Codec.BOOL.fieldOf("has_skylight").forGetter(DimensionType::hasSkyLight), Codec.BOOL.fieldOf("has_ceiling").forGetter(DimensionType::hasCeiling), Codec.BOOL.fieldOf("ultrawarm").forGetter(DimensionType::ultraWarm), Codec.BOOL.fieldOf("natural").forGetter(DimensionType::natural), Codec.doubleRange((double)1.0E-5F, 3.0E7D).fieldOf("coordinate_scale").forGetter(DimensionType::coordinateScale), Codec.BOOL.fieldOf("piglin_safe").forGetter(DimensionType::piglinSafe), Codec.BOOL.fieldOf("bed_works").forGetter(DimensionType::bedWorks), Codec.BOOL.fieldOf("respawn_anchor_works").forGetter(DimensionType::respawnAnchorWorks), Codec.BOOL.fieldOf("has_raids").forGetter(DimensionType::hasRaids), Codec.intRange(MIN_Y, MAX_Y).fieldOf("min_y").forGetter(DimensionType::minY), Codec.intRange(16, Y_SIZE).fieldOf("height").forGetter(DimensionType::height), Codec.intRange(0, Y_SIZE).fieldOf("logical_height").forGetter(DimensionType::logicalHeight), ResourceLocation.CODEC.fieldOf("infiniburn").forGetter((dimensionType) -> {
+-                return dimensionType.infiniburn;
+-            }), ResourceLocation.CODEC.fieldOf("effects").orElse(OVERWORLD_EFFECTS).forGetter((dimensionType) -> {
+-                return dimensionType.effectsLocation;
+-            }), Codec.FLOAT.fieldOf("ambient_light").forGetter((dimensionType) -> {
+-                return dimensionType.ambientLight;
+-            })).apply(instance, DimensionType::new);
+-        }).comapFlatMap(DimensionType::guardY, Function.identity());
+-    }
+ }
 diff --git a/src/main/java/space/nerdsin/paperx/PaperXConfig.java b/src/main/java/space/nerdsin/paperx/PaperXConfig.java
 index 049fa3d2eb4f3068455c5d77f7376a172b11eab7..63c517e1741493889081e2a6233ada824d3448a2 100644
 --- a/src/main/java/space/nerdsin/paperx/PaperXConfig.java
