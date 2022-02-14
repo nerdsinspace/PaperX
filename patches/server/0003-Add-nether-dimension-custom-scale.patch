@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: mattcc <matt.fr1kin@gmail.com>
+Date: Mon, 14 Feb 2022 17:12:08 -0600
+Subject: [PATCH] Add nether dimension custom scale
+
+
+diff --git a/src/main/java/net/minecraft/world/level/dimension/DimensionType.java b/src/main/java/net/minecraft/world/level/dimension/DimensionType.java
+index a41f4c915c26682f02b81d0104e63029e8b17e58..4490b385f30a7d6b2c78df61e52eb84aa3ce086d 100644
+--- a/src/main/java/net/minecraft/world/level/dimension/DimensionType.java
++++ b/src/main/java/net/minecraft/world/level/dimension/DimensionType.java
+@@ -226,7 +226,9 @@ public class DimensionType {
+     }
+ 
+     public double coordinateScale() {
+-        return this.coordinateScale;
++        return this == DEFAULT_NETHER
++            ? space.nerdsin.paperx.PaperXConfig.getInstance().getNetherDimensionScale()
++            : this.coordinateScale;
+     }
+ 
+     public boolean piglinSafe() {
+diff --git a/src/main/java/space/nerdsin/paperx/PaperXConfig.java b/src/main/java/space/nerdsin/paperx/PaperXConfig.java
+index 049fa3d2eb4f3068455c5d77f7376a172b11eab7..63c517e1741493889081e2a6233ada824d3448a2 100644
+--- a/src/main/java/space/nerdsin/paperx/PaperXConfig.java
++++ b/src/main/java/space/nerdsin/paperx/PaperXConfig.java
+@@ -24,6 +24,9 @@ public final class PaperXConfig {
+   private final YamlConfiguration yaml = new YamlConfiguration();
+   private File config;
+ 
++  @Setting("nether-dimension-scale")
++  private Double netherDimensionScale = 8.0D;
++
+   private PaperXConfig() {
+     for (Field field : getClass().getDeclaredFields()) {
+       if (field.isAnnotationPresent(Setting.class)) {
+@@ -81,6 +84,10 @@ public final class PaperXConfig {
+     }
+   }
+ 
++  public double getNetherDimensionScale() {
++    return netherDimensionScale;
++  }
++
+   @Target({ElementType.FIELD})
+   @Retention(RetentionPolicy.RUNTIME)
+   @interface Setting {
