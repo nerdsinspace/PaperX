@@ -1,0 +1,32 @@
+version: '2.4'
+
+services:
+  gradle:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: jdk-slim-git
+    environment:
+      - CI=${CI:-}
+    volumes:
+      # gradle caches
+      - ~/.gradle/caches/modules-2:/root/.gradle/caches/modules-2:z
+      - ~/.gradle/wrapper/dists:/root/.gradle/wrapper/dists:z
+      # exclude these from workdir mount
+      - /opt/build/PaperX-API/
+      - /opt/build/PaperX-Server/
+      # only allow reads to the git repo
+      - .git/:/opt/build/.git/:ro
+      # paperweight cache contains files that save the absolute path,
+      # so we create a special volume to cache this directory
+      - paperweight_cache:/opt/build/.gradle/caches/paperweight/
+      # mount working directory
+      - ./:/opt/build:Z
+    working_dir: /opt/build
+    # these two gradle tasks must be run independently, otherwise it will fail
+    command: bash -c 'set -x
+               && ./gradlew --no-daemon applyPatches --stacktrace
+               && ./gradlew --no-daemon createReobfPaperclipJar --stacktrace'
+
+volumes:
+  paperweight_cache:

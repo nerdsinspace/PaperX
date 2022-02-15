@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [[ -n "${DEBUG_MODE}" ]]; then
+  set -x
+fi
+
+function usage() {
+  echo -n \
+    "Usage: $(basename "$0")
+Build application for staging or a release.
+"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  if [[ "${1:-}" == "--help" ]]; then
+    usage
+  else
+    # if mounting the hosts cache folder, gradle inside the container will try and
+    # acquire a file lock that the host machine may already be holding. this will
+    # result in the container hanging indefinitely. stopping any existing daemons
+    # on the host is the simplest way to 'solve' this issue
+    if command -v java &>/dev/null; then
+      ./gradlew --stop
+    fi
+
+    chmod +x ./gradlew
+
+    CI="${CI:-}" docker-compose -f docker-compose.ci.yml \
+      run --rm gradle
+  fi
+fi
