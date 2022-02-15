@@ -2,9 +2,18 @@ import io.papermc.paperweight.util.constants.PAPERCLIP_CONFIG
 
 plugins {
   java
+  id("com.palantir.git-version") version "0.12.3"
   id("com.github.johnrengelman.shadow") version "7.1.1"
   id("io.papermc.paperweight.patcher") version "1.3.4"
 }
+
+val versionDetails: groovy.lang.Closure<com.palantir.gradle.gitversion.VersionDetails> by extra
+val git = versionDetails()
+
+group = "dev.fiki.paperx"
+version = "${providers.gradleProperty("mcVersion").get()}-${git.lastTag.substring(1)}.r${git.commitDistance}"
+
+val isCiBuilding = System.getenv()["CI"] == "true"
 
 repositories {
   mavenCentral()
@@ -64,3 +73,14 @@ paperweight {
     }
   }
 }
+
+val actionsTask by tasks.register("createGitHubActionsVars") {
+  onlyIf { isCiBuilding }
+  doFirst {
+    println("::set-output name=paperclip::${tasks.createReobfPaperclipJar.get().outputZip.get().asFile.name}")
+    println("::set-output name=bundler::${tasks.createReobfBundlerJar.get().outputZip.get().asFile.name}")
+    println("::set-output name=version::${project.version}")
+  }
+}
+
+tasks.createReobfPaperclipJar { finalizedBy(actionsTask) }

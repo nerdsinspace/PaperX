@@ -2,6 +2,10 @@ name: CI
 
 on:
   push:
+    branches:
+      - 'master'
+    tags:
+      - 'v*'
   pull_request:
 
 jobs:
@@ -16,6 +20,7 @@ jobs:
           path: |
             ~/.gradle/caches/modules-2
             ~/.gradle/wrapper/dists
+            ./.gradle/paperweight_cache
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
@@ -29,10 +34,10 @@ jobs:
           sudo rm -f ~/.gradle/caches/modules-2/modules-2.lock
           sudo rm -f ~/.gradle/caches/modules-2/gc.properties
 
-# TODO:
-#      - name: Upload the built artifact
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: ${{ steps.exec.outputs.jar }}
-#          path: build/libs/${{ steps.exec.outputs.jar }}
-#          if-no-files-found: error
+      - name: Create release if this is a tagged workflow
+        uses: ncipollo/release-action@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          artifacts: build/libs/${{ steps.exec.outputs.paperclip }}
+          name: PaperX ${{ steps.exec.outputs.version }}
+          token: ${{ secrets.GITHUB_TOKEN }}

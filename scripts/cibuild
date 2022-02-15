@@ -17,6 +17,10 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   if [[ "${1:-}" == "--help" ]]; then
     usage
   else
+    # create .gradle with correct user permissions
+    # docker daemon may otherwise create this directory with root ownership
+    mkdir -p .gradle
+
     # if mounting the hosts cache folder, gradle inside the container will try and
     # acquire a file lock that the host machine may already be holding. this will
     # result in the container hanging indefinitely. stopping any existing daemons

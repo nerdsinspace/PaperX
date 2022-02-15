@@ -5,7 +5,6 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    container_name: jdk-slim-git
     environment:
       - CI=${CI:-}
     volumes:
@@ -19,14 +18,13 @@ services:
       - .git/:/opt/build/.git/:ro
       # paperweight cache contains files that save the absolute path,
       # so we create a special volume to cache this directory
-      - paperweight_cache:/opt/build/.gradle/caches/paperweight/
+      # NOTE: a named volume would be better for this, but github actions does
+      # not allow you to cache /var/lib/docker/volumes
+      - ./.gradle/paperweight_cache/:/opt/build/.gradle/caches/paperweight/:Z
       # mount working directory
       - ./:/opt/build:Z
     working_dir: /opt/build
     # these two gradle tasks must be run independently, otherwise it will fail
     command: bash -c 'set -x
-               && ./gradlew --no-daemon applyPatches --stacktrace
-               && ./gradlew --no-daemon createReobfPaperclipJar --stacktrace'
-
-volumes:
-  paperweight_cache:
+      && ./gradlew --no-daemon applyPatches --stacktrace
+      && ./gradlew --no-daemon createReobfPaperclipJar --stacktrace'
