@@ -34,10 +34,16 @@ jobs:
           sudo rm -f ~/.gradle/caches/modules-2/modules-2.lock
           sudo rm -f ~/.gradle/caches/modules-2/gc.properties
 
+      - name: Rename build files
+        working-directory: build/libs
+        run: |
+          mv ${{ steps.exec.outputs.paperclip }} PaperX-paperclip.jar
+          mv ${{ steps.exec.outputs.bundler }} PaperX-bundler.jar
+
       - name: Create release if this is a tagged workflow
         uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          artifacts: build/libs/${{ steps.exec.outputs.paperclip }}
+          artifacts: build/libs/PaperX-paperclip.jar
           name: PaperX ${{ steps.exec.outputs.version }}
           token: ${{ secrets.GITHUB_TOKEN }}
