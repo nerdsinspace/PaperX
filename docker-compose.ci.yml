@@ -27,4 +27,5 @@ services:
     # these two gradle tasks must be run independently, otherwise it will fail
     command: bash -c 'set -x
       && ./gradlew --no-daemon applyPatches --stacktrace
-      && ./gradlew --no-daemon createReobfPaperclipJar --stacktrace'
+      && ./gradlew --no-daemon createReobfPaperclipJar --stacktrace
+      && chmod a+rw build/libs/*'

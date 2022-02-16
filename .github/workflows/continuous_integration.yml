@@ -37,8 +37,10 @@ jobs:
       - name: Rename build files
         working-directory: build/libs
         run: |
-          mv ${{ steps.exec.outputs.paperclip }} PaperX-paperclip.jar
-          mv ${{ steps.exec.outputs.bundler }} PaperX-bundler.jar
+          pushd build/libs
+          cp ${{ steps.exec.outputs.paperclip }} PaperX-paperclip.jar
+          cp ${{ steps.exec.outputs.bundler }} PaperX-bundler.jar
+          popd
 
       - name: Create release if this is a tagged workflow
         uses: ncipollo/release-action@v1
