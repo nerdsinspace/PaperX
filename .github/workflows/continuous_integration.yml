@@ -35,7 +35,6 @@ jobs:
           sudo rm -f ~/.gradle/caches/modules-2/gc.properties
 
       - name: Rename build files
-        working-directory: build/libs
         run: |
           pushd build/libs
           cp ${{ steps.exec.outputs.paperclip }} PaperX-paperclip.jar
