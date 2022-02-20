@@ -32,6 +32,25 @@ index 38a0fb9a7c4ade9cacfd30dffabfea7e6b773981..bdfc503266749ba54595ae2a9bdb0f0f
          this.setPvpAllowed(dedicatedserverproperties.pvp);
          this.setFlightAllowed(dedicatedserverproperties.allowFlight);
          this.setResourcePack(dedicatedserverproperties.resourcePack, this.getPackHash());
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index f810bebfca3932c80e20646eb0680f7718506707..5a6458eeb128bab25de668775216be19b5f5f4f0 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -160,6 +160,14 @@ public class Main {
+                         .defaultsTo("Unknown Server")
+                         .describedAs("Name");
+                 // Paper end
++
++                // PaperX start
++                acceptsAll(asList("paperx", "paperx-settings"), "File for paperx settings")
++                    .withRequiredArg()
++                    .ofType(File.class)
++                    .defaultsTo(new File("paperx.yml"))
++                    .describedAs("Yml file");
++                // PaperX end
+             }
+         };
+ 
 diff --git a/src/main/java/space/nerdsin/paperx/PaperXConfig.java b/src/main/java/space/nerdsin/paperx/PaperXConfig.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..049fa3d2eb4f3068455c5d77f7376a172b11eab7
