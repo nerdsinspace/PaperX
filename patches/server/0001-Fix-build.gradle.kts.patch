@@ -5,17 +5,18 @@ Subject: [PATCH] Fix build.gradle.kts
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 028f6a1795ceb99d1760c73b0980238677b4b8bc..8b15f82dcdb4905131e56a703f96310105c2b0ce 100644
+index 028f6a1795ceb99d1760c73b0980238677b4b8bc..1af86d747e11a335b78dc2b5c730cca9865a55fb 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -18,8 +18,8 @@ repositories {
+@@ -18,8 +18,9 @@ repositories {
  }
  
  dependencies {
 -    implementation(project(":paper-api"))
 -    implementation(project(":paper-mojangapi"))
-+    implementation(project(":PaperX-API"))
-+    implementation("io.papermc.paper:paper-mojangapi:1.18-R0.1-SNAPSHOT")
++//    implementation(project(":PaperX-API"))
++    implementation("io.papermc.paper:paper-api:1.18.1-R0.1-SNAPSHOT")
++    implementation("io.papermc.paper:paper-mojangapi:1.18.1-R0.1-SNAPSHOT")
      // Paper start
      implementation("org.jline:jline-terminal-jansi:3.21.0")
      implementation("net.minecrell:terminalconsoleappender:1.3.0")
